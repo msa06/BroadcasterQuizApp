@@ -54,10 +54,13 @@ public class MainActivity extends AppCompatActivity {
         //Listen to Quiz Status
         attachQuizStatusListener();
 
-        //Listner to Quiz
+        //Enable Disable Button
+        disableButton();
+
+        //Listener to Quiz
         attachQuizListener();
 
-        //Listner to Question
+        //Listener to Question
         attachQuestionListener();
 
     }
@@ -77,10 +80,27 @@ public class MainActivity extends AppCompatActivity {
         mQuizReference = FirebaseDatabase.getInstance().getReference().child("Quizzes");
         questionList = new ArrayList<>();
         v1=findViewById(R.id.video);
+
     }
 
-    private void updateQuestion(String currentQuestionNo, List<Question> questions) {
-        int currentno = Integer.parseInt(currentQuestionNo);
+    private void disableButton() {
+        //When QUiz is Live
+        if(liveStatus == "1"){
+            startbtn.setClickable(false);
+            showbtn.setClickable(true);
+            nextbtn.setClickable(true);
+            endbtn.setClickable(true);
+        }
+        else{
+            showbtn.setClickable(false);
+            nextbtn.setClickable(false);
+            endbtn.setClickable(false);
+            startbtn.setClickable(true);
+        }
+    }
+
+    private void updateQuestion(int currentQuestionNo, List<Question> questions) {
+        int currentno = currentQuestionNo;
         questionText.setText(questions.get(currentno).getQues());
         optbtn1.setText(questions.get(currentno).getOp1());
         optbtn2.setText(questions.get(currentno).getOp2());
@@ -97,9 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 v1.setVideoURI(uri);
                 v1.requestFocus();
                 v1.start();
-
-                showQuestion = "1";
-               currentQuesno = "0";
+                currentQuesno = "0";
                 updateChange();
             }
         });
@@ -124,13 +142,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 int curr = Integer.parseInt(currentQuesno);
-                curr++;
-                if (curr > 5) {
+                System.out.println("Current question number : "+ curr);
+                if (curr >= 5) {
                     curr = 0;
                 }
+
+                updateQuestion(curr, questionList);
+                curr++;
                 currentQuesno = Integer.toString(curr);
-                updateQuestion(currentQuesno, questionList);
                 updateChange();
+
+
             }
         });
 
@@ -139,6 +161,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 liveStatus = "0";
+                showQuestion="0";
+                currentQuesno="0";
+                v1.stopPlayback();
                 updateChange();
             }
         });
@@ -158,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                         Question questions = questionsnap.getValue(Question.class);
                         questionList.add(questions);
                     }
-                   // updateQuestion(currentQuesno, questionList);
+                    // updateQuestion(currentQuesno, questionList);
                 }
 
                 @Override
@@ -196,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
                     liveStatus = status.getLive();
                     currentQuesno = status.getCurques();
                     showQuestion = status.getShowques();
+                    //Enable Disable Button
+                    disableButton();
                 }
 
                 @Override
@@ -210,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        endbtn.callOnClick();
         detachAllListener();
     }
 
