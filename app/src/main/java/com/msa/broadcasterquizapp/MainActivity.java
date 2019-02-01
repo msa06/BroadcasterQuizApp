@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private ValueEventListener mQuizListener;
     private ValueEventListener mQuestionListner;
     private VideoView v1;
-    private Uri uri = Uri.parse("https://firebasestorage.googleapis.com/v0/b/quizapp-36880.appspot.com/o/Phree%20-%20Make%20the%20world%20your%20paper.mp4?alt=media&token=e2943cc3-554a-4cd2-a23e-d38256aa28ed");
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 liveStatus = "1";
+
                 v1.setVideoURI(uri);
                 v1.requestFocus();
                 v1.start();
@@ -126,8 +127,10 @@ public class MainActivity extends AppCompatActivity {
         showbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (showQuestion == "0") {
+                if (showQuestion.equals("0")) {
                     showQuestion = "1";
+                    int curr = Integer.parseInt(currentQuesno);
+                    updateQuestion(curr, questionList);
                     showbtn.setText("Hide Question");
                 } else {
                     showQuestion = "0";
@@ -146,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
                 if (curr >= 5) {
                     curr = 0;
                 }
-
                 updateQuestion(curr, questionList);
                 curr++;
                 currentQuesno = Integer.toString(curr);
@@ -201,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     Quiz quiz = dataSnapshot.getValue(Quiz.class);
+                    uri = uri.parse(quiz.getQvideourl());
                 }
 
                 @Override
